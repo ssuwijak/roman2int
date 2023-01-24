@@ -12,6 +12,13 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
+            //x1();
+            x2();
+
+        }
+
+        static void x1()
+        {
             string roman = "MCMXCIV".ToUpper();
 
             int x = 0;
@@ -83,8 +90,33 @@ namespace ConsoleApp1
             Console.WriteLine("total = " + total.ToString());
 
             Console.ReadKey();
-
         }
+
+        static void x2()
+        {
+            string roman = "MCMXCIV";
+            int total = 0;
+
+            Console.WriteLine("roman = " + roman);
+
+            RomanNumber r = new RomanNumber();
+            try
+            {
+                string value = r.chkText(roman);
+                total = r.GetValue(value);
+               
+                Console.WriteLine("total = " + total.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            Console.WriteLine("press any key to close");
+            Console.ReadKey();
+        }
+
+   
     }
 
 
