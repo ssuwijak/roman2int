@@ -1,142 +1,160 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Schema;
 
-namespace ConsoleApp1
+namespace Roman2Int
 {
     public class RomanNumber
     {
         protected string roman_chars = "MDCLXVI";
         protected int[] roman_values = { 1000, 500, 100, 50, 10, 5, 1 };
-        public string Text { get; set; }
-        protected int getValue(string c)
+        protected string roman_specials = "IV,IX,XL,XC,CD,CM";
+
+        public bool CheckText(ref string value, bool enableException = false)
         {
-            int i = 0, j = 0;
+            bool ret = false;
+            string msg = "ok";
 
-            string value = c.Trim().ToUpper();
-
-            if (value.Length == 1)
-            {
-                i = roman_chars.IndexOf(value);
-                if (i > -1)
-                    j = roman_values[i];
-            }
-
-            return j;
-        }
-
-        public string chkText(string value)
-        {
             value = value.Trim().ToUpper();
+
             int len = value.Length;
 
             if (len < 1 || len > 15)
-                throw new Exception($"'{value}', length was invalid.");
-            else if (value.Contains(" "))
-                throw new Exception($"'{value}' contained a space.");
+                msg = $"'{value}', length was invalid.";
             else
             {
-                bool flag = true;
+                ret = true;
+
                 foreach (char c in value)
                 {
-                    if (!roman_chars.Contains(c))
+                    ret = roman_chars.Contains(c);
+                    if (!ret)
                     {
-                        flag = false;
+                        msg = $"'{value}' contained invalid character";
                         break;
                     }
                 }
-
-                if (flag)
-                    return value;
-                else
-                    throw new Exception($"'{value}' contained invalid character");
             }
+
+            if (!ret && enableException)
+                throw new Exception(msg);
+
+            return ret;
         }
-
-
-        public int GetValue(string value)
+        protected int getValue(char c)
         {
-            List<string> r1 = new List<string>();
-            List<string> r2 = new List<string>();
-            List<int> r3 = new List<int>();
+            int ret = 0;
 
-            int total = 0;
-            int i = 0;
+            int i = roman_chars.IndexOf(c);
+            if (i > -1)
+                ret = roman_values[i];
 
-            // split roman number
-            int k = value.Length - 1;
+            return ret;
+        }
+        protected int getValue(string strLen2)
+        {
+            int ret = 0;
 
-            for (i = 0; i < k; i++)
+            if (strLen2 is null || strLen2.Length != 2)
+                return ret;
+
+            if (roman_specials.Contains(strLen2))
             {
-                r1.Add(value.Substring(i, 2));
-            }
-            r1.Add(value.Substring(k));
+                char[] c = { 'a', 'a' };
+                c[0] = strLen2[0];
+                c[1] = strLen2[1];
 
-            // consider the splitted roman number
-            for (i = 0; i < k; i++)
-            {
-                string v = r1[i];
-
-                if (v.Length == 1)
-                {
-                    r2.Add(v);
-                    r3.Add(this.getValue(v));
-                }
-                else if ("IV,IX,XL,XC,CD,CM".Contains(v))
-                {
-                    r2.Add(v);
-
-                    var a1 = v.Substring(0, 1);
-                    var a2 = v.Substring(1, 1);
-                    var a3 = this.getValue(a2) - this.getValue(a1);
-
-                    r3.Add(a3);
-
-                    i++;// continue;
-                }
-                else
-                {
-                    var a1 = v.Substring(0, 1);
-                    var a2 = this.getValue(a1);
-
-                    r2.Add(a1);
-                    r3.Add(a2);
-                }
+                ret = this.getValue(c[1]) - this.getValue(c[0]);
             }
 
-            // check order ... max to min
-            bool flagError = false;
-            k = roman_values[0];
-            foreach (int v in r3)
-            {
-                flagError = v > k;
-                if (flagError)
-                {
-                    // error .. invalid order
-                    break;
-                }
-                else
-                    k = v;
-            }
+            return ret;
+        }
+        public int GetValue(string value, bool checkText = true)
+        {
+            int ret = 0;
 
-            // if no error .. calculate the total
-            if (flagError)
+            if (checkText)
+                if (!this.CheckText(ref value))
+                    return ret;
 
-                throw new Exception($"'{value}' invalid order");
+            int len = value.Length;
+
+            if (len == 1)
+                ret = this.getValue(value[0]);
+            else if (len == 2 && roman_specials.Contains(value))
+                ret = this.getValue(value);
             else
             {
-                total = 0;
+                List<string> r1 = new List<string>();
+                List<string> r2 = new List<string>();
+                List<int> r3 = new List<int>();
+
+                int i, j;
+
+                // split roman number by 2 chars. 
+                j = len - 1;
+
+                for (i = 0; i < j; i++)
+                {
+                    r1.Add(value.Substring(i, 2));// ex. abcde --> ab,bc,cd,de,e
+                }
+                r1.Add(value.Substring(j));// add the last character.
+
+                // consider the splitted roman number
+                for (i = 0; i < len; i++)
+                {
+                    string vv = r1[i];
+
+                    if (vv.Length == 1)
+                    {
+                        r2.Add(vv);
+                        r3.Add(this.getValue(vv[0]));
+                    }
+                    else if (roman_specials.Contains(vv))
+                    {
+                        r2.Add(vv);
+                        r3.Add(this.getValue(vv));
+
+                        i++;// ignore and skip the next value, due to already read this round.
+                    }
+                    else
+                    {
+                        string v = vv.Substring(0, 1);// read only the 1st char.
+
+                        r2.Add(v);
+                        r3.Add(this.getValue(v[0]));
+                    }
+                }
+
+                // check order ... max to min
+                bool flagOrderError = false;
+                j = roman_values[0];// max value of roman number.
 
                 foreach (int v in r3)
-                    total += v;
+                {
+                    flagOrderError = v > j;
+                    if (flagOrderError)
+                    {
+                        // error .. invalid order
+                        break;
+                    }
+                    else
+                        j = v;
+                }
+
+                // if no error .. calculate the total
+                if (flagOrderError)
+                    throw new Exception($"'{value}' invalid order");
+                else
+                {
+                    ret = 0;
+
+                    foreach (int v in r3)
+                        ret += v;
+                }
             }
 
-            return total;
+            return ret;
         }
     }
 }

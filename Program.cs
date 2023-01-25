@@ -1,25 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ConsoleApp1
+namespace Roman2Int
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            //x1();
-            x2();
+            string roman = "MMMMCMXLIV";// "DCCLXXXVI";// "MCMXCIV";
 
+            //x1(roman);
+            x2(roman);
+
+            Console.WriteLine("press any key to close ...");
+            Console.ReadKey();
         }
 
-        static void x1()
+        static void x1(string roman)
         {
-            string roman = "MCMXCIV".ToUpper();
+            roman = roman.ToUpper();
 
             int x = 0;
             int y = 0;
@@ -89,12 +87,11 @@ namespace ConsoleApp1
             Console.WriteLine("roman = " + roman);
             Console.WriteLine("total = " + total.ToString());
 
-            Console.ReadKey();
+
         }
 
-        static void x2()
+        static void x2(string roman)
         {
-            string roman = "MCMXCIV";
             int total = 0;
 
             Console.WriteLine("roman = " + roman);
@@ -102,9 +99,8 @@ namespace ConsoleApp1
             RomanNumber r = new RomanNumber();
             try
             {
-                string value = r.chkText(roman);
-                total = r.GetValue(value);
-               
+                total = r.GetValue(roman);
+
                 Console.WriteLine("total = " + total.ToString());
             }
             catch (Exception ex)
@@ -112,11 +108,9 @@ namespace ConsoleApp1
                 Console.WriteLine($"Error: {ex.Message}");
             }
 
-            Console.WriteLine("press any key to close");
-            Console.ReadKey();
         }
 
-   
+
     }
 
 
